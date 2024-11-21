@@ -54,6 +54,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 
 #include "app.h"
+#include "bsp.h"
+#include "Mc32DriverLcd.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -141,20 +143,37 @@ void APP_Tasks ( void )
         /* Application's initial state. */
         case APP_STATE_INIT:
         {
-            bool appInitialized = true;
-       
+
+            // Init du LCD
+            lcd_init();
+            lcd_bl_on();
+            // Premier affichage LCD
+            lcd_gotoxy(1,1);
+            printf_lcd("TP0 LED+AD 2024-25");
+            lcd_gotoxy(1,2);
+            printf_lcd("Mendes Leo");
+            // Init
+            BSP_InitADC10();
+
+            // Démarage timer 1 à 100ms 
+            DRV_TMR0_Start();
+            //Première entrée en mode WAIT
+            appData.state = APP_STATE_WAIT;
+            break;
+        }
         
-            if (appInitialized)
-            {
-            
-                appData.state = APP_STATE_SERVICE_TASKS;
-            }
+        case APP_STATE_WAIT:
+        {
             break;
         }
 
         case APP_STATE_SERVICE_TASKS:
         {
-        
+            BSP_LEDToggle(BSP_LED_1);
+            appData.AdcRes = BSP_ReadAllADC();
+            lcd_gotoxy(1,3);
+            printf_lcd("Ch0 %4d Ch1 %4d", appData.AdcRes.Chan0, appData.AdcRes.Chan1);
+            appData.state = APP_STATE_WAIT;
             break;
         }
 
@@ -172,6 +191,17 @@ void APP_Tasks ( void )
 
  
 void APP_UpdateState (APP_STATES Newstate)
+{
+     appData.state = Newstate;
+}
+
+void App_Timer1Callback()
+{
+    APP_UpdateState(APP_STATE_SERVICE_TASKS);    
+}
+
+
+
 /*******************************************************************************
  End of File
  */
