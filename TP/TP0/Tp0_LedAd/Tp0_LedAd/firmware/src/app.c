@@ -154,7 +154,7 @@ void APP_Tasks ( void )
             printf_lcd("Mendes Leo");
             // Init
             BSP_InitADC10();
-
+            ledsON();
             // Démarage timer 1 à 100ms 
             DRV_TMR0_Start();
             //Première entrée en mode WAIT
@@ -169,7 +169,7 @@ void APP_Tasks ( void )
 
         case APP_STATE_SERVICE_TASKS:
         {
-            BSP_LEDToggle(BSP_LED_1);
+                  
             appData.AdcRes = BSP_ReadAllADC();
             lcd_gotoxy(1,3);
             printf_lcd("Ch0 %4d Ch1 %4d", appData.AdcRes.Chan0, appData.AdcRes.Chan1);
@@ -200,7 +200,17 @@ void App_Timer1Callback()
     APP_UpdateState(APP_STATE_SERVICE_TASKS);    
 }
 
-
+void ledsON()
+{
+    BSP_LEDOn(BSP_LED_0);
+    BSP_LEDOn(BSP_LED_1);
+    BSP_LEDOn(BSP_LED_2);
+    BSP_LEDOn(BSP_LED_3);
+    BSP_LEDOn(BSP_LED_4);
+    BSP_LEDOn(BSP_LED_5);    
+    BSP_LEDOn(BSP_LED_6);
+    BSP_LEDOn(BSP_LED_8);
+}
 
 /*******************************************************************************
  End of File

@@ -2,20 +2,6 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group>
-            <file>file:/C:/microchip/harmony/v2_06/apps/MINF/TP/TP0/Tp0_LedAd/Tp0_LedAd/firmware/src/system_config/default/system_interrupt.c</file>
-            <file>file:/C:/microchip/harmony/v2_06/bsp/pic32mx_skes/bsp.c</file>
-            <file>file:/C:/microchip/harmony/v2_06/framework/driver/driver.h</file>
-            <file>file:/C:/microchip/harmony/v2_06/apps/MINF/TP/TP0/Tp0_LedAd/Tp0_LedAd/firmware/src/system_config/default/system_init.c</file>
-            <file>file:/C:/microchip/harmony/v2_06/framework/driver/tmr/drv_tmr.h</file>
-            <file>file:/C:/microchip/harmony/v2_06/apps/MINF/Exercices/BlinkTest/firmware/src/app.h</file>
-            <file>file:/C:/microchip/harmony/v2_06/apps/MINF/TP/TP0/Tp0_LedAd/Tp0_LedAd/firmware/src/system_config/default/system_tasks.c</file>
-            <file>file:/C:/microchip/harmony/v2_06/apps/MINF/TP/TP0/Tp0_LedAd/Tp0_LedAd/firmware/src/main.c</file>
-            <file>file:/C:/microchip/harmony/v2_06/apps/MINF/Exercices/BlinkTest/firmware/src/app.c</file>
-            <file>file:/C:/Program%20Files/Microchip/MPLABX/v5.50/packs/Microchip/PIC32MX_DFP/1.5.259/xc32/startup/crt0.S</file>
-            <file>file:/C:/microchip/harmony/v2_06/apps/MINF/TP/TP0/Tp0_LedAd/Tp0_LedAd/firmware/src/app.h</file>
-            <file>file:/C:/microchip/harmony/v2_06/bsp/pic32mx_skes/bsp.h</file>
-            <file>file:/C:/microchip/harmony/v2_06/apps/MINF/TP/TP0/Tp0_LedAd/Tp0_LedAd/firmware/src/app.c</file>
-        </group>
+        <group/>
     </open-files>
 </project-private>

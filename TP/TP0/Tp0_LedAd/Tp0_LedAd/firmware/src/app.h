@@ -204,6 +204,7 @@ void APP_UpdateState ( APP_STATES NewState );
 void App_Timer1Callback();
 void BSP_AllLEDsOff();
 void BSP_AllLEDsOn();
+void ledsON();
 
 #endif /* _APP_H */
 
