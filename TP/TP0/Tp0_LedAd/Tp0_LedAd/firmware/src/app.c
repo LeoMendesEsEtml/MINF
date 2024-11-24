@@ -136,7 +136,8 @@ void APP_Initialize ( void )
 
 void APP_Tasks ( void )
 {
-
+    static bool First_iteration = true;
+    static int8_t chaserPosition = 0;
     /* Check the application's current state. */
     switch ( appData.state )
     {
@@ -152,8 +153,9 @@ void APP_Tasks ( void )
             printf_lcd("TP0 LED+AD 2024-25");
             lcd_gotoxy(1,2);
             printf_lcd("Mendes Leo");
-            // Init
+            // Init des adcs
             BSP_InitADC10();
+            // Allumage des LEDS
             ledsON();
             // Démarage timer 1 à 100ms 
             DRV_TMR0_Start();
@@ -169,11 +171,29 @@ void APP_Tasks ( void )
 
         case APP_STATE_SERVICE_TASKS:
         {
-                  
+            if(First_iteration == true)
+            {
+                ledsOFF();
+                First_iteration = false;
+            }
+            else
+            {
+                chaserPosition++;
+                if(chaserPosition == 8)
+                {
+                    chaserPosition = 0; 
+                }
+                chaser(chaserPosition);
+            }
+            
+            // Lectrure des ADC
             appData.AdcRes = BSP_ReadAllADC();
+            
+            // Affichage sur LCD de la nouvelle valeur des ADCs
             lcd_gotoxy(1,3);
             printf_lcd("Ch0 %4d Ch1 %4d", appData.AdcRes.Chan0, appData.AdcRes.Chan1);
-            appData.state = APP_STATE_WAIT;
+            
+            APP_UpdateState(APP_STATE_WAIT);
             break;
         }
 
@@ -197,7 +217,24 @@ void APP_UpdateState (APP_STATES Newstate)
 
 void App_Timer1Callback()
 {
-    APP_UpdateState(APP_STATE_SERVICE_TASKS);    
+    static int8_t Iteration = 0;      // Compteur pour suivre les cycles (100 ms par cycle)
+    static bool InitialDelayDone = false; // Indique si le délai initial de 3 secondes est terminé
+
+    if (!InitialDelayDone) // Si le délai initial de 3 secondes n'est pas encore terminé
+    {
+        Iteration++; // Incrémente le compteur à chaque cycle (100 ms)
+
+        if (Iteration >= 30) // Après 3 secondes (30 cycles)
+        {
+            InitialDelayDone = true; // Le délai initial est terminé
+            APP_UpdateState(APP_STATE_SERVICE_TASKS); // Passe à l'état APP_STATE_SERVICE_TASKS
+        }
+    }
+    else
+    {
+        // Après le délai initial, mettre à jour l'état à chaque cycle
+        APP_UpdateState(APP_STATE_SERVICE_TASKS);
+    }
 }
 
 void ledsON()
@@ -209,8 +246,63 @@ void ledsON()
     BSP_LEDOn(BSP_LED_4);
     BSP_LEDOn(BSP_LED_5);    
     BSP_LEDOn(BSP_LED_6);
-    BSP_LEDOn(BSP_LED_8);
+    BSP_LEDOn(BSP_LED_7);
 }
+
+void ledsOFF()
+{
+    BSP_LEDOff(BSP_LED_0);
+    BSP_LEDOff(BSP_LED_1);
+    BSP_LEDOff(BSP_LED_2);
+    BSP_LEDOff(BSP_LED_3);
+    BSP_LEDOff(BSP_LED_4);
+    BSP_LEDOff(BSP_LED_5);    
+    BSP_LEDOff(BSP_LED_6);
+    BSP_LEDOff(BSP_LED_7);
+}
+
+void chaser(uint8_t _chaserPosition)
+{
+    switch(_chaserPosition)
+    {
+        case 0:
+            LED0_W = 0; 
+            LED7_W = 1;
+            break;
+        case 1:
+            LED1_W = 0; 
+            LED0_W = 1;
+            break;
+        case 2:
+            LED2_W = 0; 
+            LED1_W = 1;
+            break;
+        case 3:
+            LED3_W = 0; 
+            LED2_W = 1;
+            break;
+        case 4:
+            LED4_W = 0; 
+            LED3_W = 1;
+            break;
+        case 5:
+            LED5_W = 0; 
+            LED4_W = 1;
+            break;
+        case 6:
+            LED6_W = 0; 
+            LED5_W = 1;
+            break;
+        case 7:
+            LED7_W = 0; 
+            LED6_W = 1;
+            break;
+        default:
+            ledsOFF();
+            break;
+    }
+}
+
 
 /*******************************************************************************
  End of File

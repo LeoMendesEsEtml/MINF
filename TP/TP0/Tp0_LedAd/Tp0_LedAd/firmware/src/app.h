@@ -167,6 +167,9 @@ typedef struct
 */
 
 void APP_Initialize ( void );
+void ledsON(void);    // Allume toutes les LEDs
+void ledsOFF(void);   // Éteint toutes les LEDs
+void chaser(uint8_t chaserPosition); // Effectue une animation de type chaser en fonction de la position
 
 
 /*******************************************************************************
