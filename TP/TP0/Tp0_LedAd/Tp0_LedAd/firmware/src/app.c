@@ -136,95 +136,87 @@ void APP_Initialize ( void )
 
 void APP_Tasks ( void )
 {
-    static bool First_iteration = true;
-    static int8_t chaserPosition = 0;
+    static bool First_iteration = true; // Indique si c'est la première itération
+    static int8_t chaserPosition = 0;  // Position actuelle dans le chaser
+
     /* Check the application's current state. */
-    switch ( appData.state )
+    switch ( appData.state)
     {
         /* Application's initial state. */
         case APP_STATE_INIT:
         {
-
-            // Init du LCD
-            lcd_init();
-            lcd_bl_on();
-            // Premier affichage LCD
-            lcd_gotoxy(1,1);
-            printf_lcd("TP0 LED+AD 2024-25");
-            lcd_gotoxy(1,2);
-            printf_lcd("Mendes Leo");
-            // Init des adcs
-            BSP_InitADC10();
-            // Allumage des LEDS
-            ledsON();
-            // Démarage timer 1 à 100ms 
-            DRV_TMR0_Start();
-            //Première entrée en mode WAIT
-            appData.state = APP_STATE_WAIT;
+            lcd_init(); // Initialisation de l'écran LCD
+            lcd_bl_on(); // Allume le rétroéclairage du LCD
+            
+            lcd_gotoxy(1,1); // Positionne le curseur à la première ligne
+            printf_lcd("TP0 LED+AD 2024-25"); // Affiche un texte d'introduction
+            lcd_gotoxy(1,2); // Positionne le curseur à la deuxième ligne
+            printf_lcd("Mendes Leo"); // Affiche le nom de l'auteur
+            
+            BSP_InitADC10(); // Initialisation des ADC (convertisseurs analogiques-numériques)
+            ledsON(); // Allume toutes les LEDs
+            DRV_TMR0_Start(); // Démarre le timer 0 avec une période de 100 ms
+            
+            APP_UpdateState(APP_STATE_WAIT); // Passe à l'état WAIT
             break;
         }
         
         case APP_STATE_WAIT:
         {
-            break;
+            break; // Ne fait rien dans cet état, en attente d'un déclencheur
         }
 
         case APP_STATE_SERVICE_TASKS:
         {
-            if(First_iteration == true)
+            if (First_iteration == true) // Si c'est la première itération
             {
-                ledsOFF();
-                First_iteration = false;
+                ledsOFF(); // Éteint toutes les LEDs
+                First_iteration = false; // Marque la fin de la première itération
             }
             else
             {
-                chaserPosition++;
-                if(chaserPosition == 8)
+                chaserPosition++; // Avance d'une position dans le chaser
+                if (chaserPosition == 8) // Si la position dépasse la dernière LED
                 {
-                    chaserPosition = 0; 
+                    chaserPosition = 0; // Reboucle sur la première LED
                 }
-                chaser(chaserPosition);
+                chaser(chaserPosition); // Met à jour l'état des LEDs
             }
             
-            // Lectrure des ADC
-            appData.AdcRes = BSP_ReadAllADC();
+            appData.AdcRes = BSP_ReadAllADC(); // Lecture des résultats des ADC
             
-            // Affichage sur LCD de la nouvelle valeur des ADCs
-            lcd_gotoxy(1,3);
-            printf_lcd("Ch0 %4d Ch1 %4d", appData.AdcRes.Chan0, appData.AdcRes.Chan1);
+            lcd_gotoxy(1,3); // Positionne le curseur à la troisième ligne
+            printf_lcd("Ch0 %4d Ch1 %4d", appData.AdcRes.Chan0, appData.AdcRes.Chan1); // Affiche les valeurs des ADC
             
-            APP_UpdateState(APP_STATE_WAIT);
+            APP_UpdateState(APP_STATE_WAIT); // Retourne à l'état WAIT
             break;
         }
 
-        /* TODO: implement your application state machine.*/
-        
-
-        /* The default state should never be executed. */
         default:
         {
-            /* TODO: Handle error in application's state machine. */
-            break;
+            break; // Défaut pour les états non gérés
         }
     }
 }
 
+
  
 void APP_UpdateState (APP_STATES Newstate)
 {
-     appData.state = Newstate;
+    appData.state = Newstate; // Met à jour l'état de l'application
 }
+
 
 void App_Timer1Callback()
 {
     static int8_t Iteration = 0;      // Compteur pour suivre les cycles (100 ms par cycle)
     static bool InitialDelayDone = false; // Indique si le délai initial de 3 secondes est terminé
 
-    if (!InitialDelayDone) // Si le délai initial de 3 secondes n'est pas encore terminé
+    if (InitialDelayDone == false) // Si le délai initial de 3 secondes n'est pas encore terminé
     {
         Iteration++; // Incrémente le compteur à chaque cycle (100 ms)
 
-        if (Iteration >= 30) // Après 3 secondes (30 cycles)
+        if (Iteration >= 30) // Après 3 secondes (30 cycles de 100 ms)
         {
             InitialDelayDone = true; // Le délai initial est terminé
             APP_UpdateState(APP_STATE_SERVICE_TASKS); // Passe à l'état APP_STATE_SERVICE_TASKS
@@ -232,10 +224,10 @@ void App_Timer1Callback()
     }
     else
     {
-        // Après le délai initial, mettre à jour l'état à chaque cycle
-        APP_UpdateState(APP_STATE_SERVICE_TASKS);
+        APP_UpdateState(APP_STATE_SERVICE_TASKS); // Passe à SERVICE_TASKS à chaque cycle après le délai initial
     }
 }
+
 
 void ledsON()
 {
@@ -261,7 +253,7 @@ void ledsOFF()
     BSP_LEDOff(BSP_LED_7);
 }
 
-void chaser(uint8_t _chaserPosition)
+void chaser(uint8_t _chaserPosition) // Gère la position du chaser
 {
     switch(_chaserPosition)
     {
@@ -298,7 +290,7 @@ void chaser(uint8_t _chaserPosition)
             LED6_W = 1;
             break;
         default:
-            ledsOFF();
+            ledsOFF();// Éteint toutes les LEDs si la position est invalide
             break;
     }
 }
