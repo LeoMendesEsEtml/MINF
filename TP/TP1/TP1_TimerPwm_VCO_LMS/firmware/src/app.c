@@ -154,7 +154,14 @@ void APP_Tasks ( void )
 
         case APP_STATE_SERVICE_TASKS:
         {
+            // LMS_TP1
             // Test sync
+=======
+        
+            if (static char car)
+            {
+              car++;
+            }
             break;
         }
 
