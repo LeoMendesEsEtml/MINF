@@ -53,7 +53,14 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 // *****************************************************************************
 
+#include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdlib.h>
+// Librairies dédiées à TP1
 #include "app.h"
+#include "Mc32DriverLcd.h"
+#include "Mc32Delays.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -141,6 +148,12 @@ void APP_Tasks ( void )
         /* Application's initial state. */
         case APP_STATE_INIT:
         {
+                lcd_init(); // Initialise l'écran LCD
+                lcd_gotoxy(1, 1); // Positionne le curseur à la ligne 1, colonne 1
+    printf_lcd("TP1 PWM&A/D 2024"); // Affiche un titre sur la ligne 1
+    lcd_gotoxy(1, 2); // Positionne le curseur à la ligne 2, colonne 1
+    printf_lcd("Leo Mendes, Vitor Coelho"); // Affiche le nom des auteurs sur la ligne 2
+    lcd_bl_on(); // Active le rétroéclairage de l'écran LCD
             bool appInitialized = true;
        
         
@@ -156,12 +169,6 @@ void APP_Tasks ( void )
         {
             // LMS_TP1
             // Test sync
-=======
-        
-            if (static char car)
-            {
-              car++;
-            }
             break;
         }
 
