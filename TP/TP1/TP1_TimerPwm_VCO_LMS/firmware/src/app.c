@@ -156,7 +156,7 @@ void APP_Tasks ( void )
         {
             // LMS_TP1
             // Test sync
-=======
+
         
             if (static char car)
             {
