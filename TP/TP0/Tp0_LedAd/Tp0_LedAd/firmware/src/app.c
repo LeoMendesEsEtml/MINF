@@ -85,19 +85,95 @@ APP_DATA appData;
 // Section: Application Callback Functions
 // *****************************************************************************
 // *****************************************************************************
+void App_Timer1Callback()
+{
+    static int8_t Iteration = 0;      // Compteur pour suivre les cycles (100 ms par cycle)
+    static bool InitialDelayDone = false; // Indique si le délai initial de 3 secondes est terminé
 
-/* TODO:  Add any necessary callback functions.
-*/
+    if (InitialDelayDone == false) // Si le délai initial de 3 secondes n'est pas encore terminé
+    {
+        Iteration++; // Incrémente le compteur à chaque cycle (100 ms)
+
+        if (Iteration >= 30) // Après 3 secondes (30 cycles de 100 ms)
+        {
+            InitialDelayDone = true; // Le délai initial est terminé
+            APP_UpdateState(APP_STATE_SERVICE_TASKS); // Passe à l'état APP_STATE_SERVICE_TASKS
+        }
+    }
+    else
+    {
+        APP_UpdateState(APP_STATE_SERVICE_TASKS); // Passe à SERVICE_TASKS à chaque cycle après le délai initial
+    }
+}
 
 // *****************************************************************************
 // *****************************************************************************
 // Section: Application Local Functions
 // *****************************************************************************
 // *****************************************************************************
+#define LED_COUNT 7  // Nombre de LEDs gérées
+// Tableau des positions des LEDs actives (RA0, RA1, RA4, RA5, RA6, RA15, RB10)
+const uint8_t ledPins[LED_COUNT] = {0, 1, 4, 5, 6, 15, 10};
 
 
-/* TODO:  Add any necessary local functions.
-*/
+void chaser(uint8_t _chaserPosition)
+{
+    // Éteindre toutes les LEDs
+    TurnOffAllLEDs();
+
+    // Accéder directement à la LED correspondante sans validation de position
+    uint8_t ledPin = ledPins[_chaserPosition];
+
+    // Si la LED est sur le PORTA (RA0 à RA7), on l'active
+    if (ledPin <= 7) 
+    {
+        LATA &= ~(1 << ledPin); // Met le bit correspondant à 0
+    }
+    // Si la LED est sur le PORTB (RB10), on l'active
+    else if (ledPin == 10) 
+    {
+        LATB &= ~(1 << ledPin); // Met le bit correspondant à 0
+    }
+    // Si la LED est sur RA15, on l'active
+    else if (ledPin == 15) 
+    {
+        LATA &= ~(1 << ledPin); // Met le bit correspondant à 0
+    }
+}
+
+/**
+ * @brief Allume toutes les LEDs (actives bas).
+ * @author LMS - VCO
+ * @date 2025-01-02
+ *
+ * @details Cette fonction utilise les masques `LEDS_PORTA_MASK` et `LEDS_PORTB_MASK`
+ *          pour forcer les broches correspondantes à l'état bas (0), allumant ainsi
+ *          les LEDs connectées.
+ */
+void TurnOnAllLEDs(void) {
+    // Allumer les LEDs sur PORTA et PORTB
+    PLIB_PORTS_Write(PORTS_ID_0, PORT_CHANNEL_A, 
+                     PLIB_PORTS_Read(PORTS_ID_0, PORT_CHANNEL_A) & ~LEDS_PORTA_MASK);
+    PLIB_PORTS_Write(PORTS_ID_0, PORT_CHANNEL_B, 
+                     PLIB_PORTS_Read(PORTS_ID_0, PORT_CHANNEL_B) & ~LEDS_PORTB_MASK);
+}
+
+/**
+ * @brief Éteint toutes les LEDs (actives bas).
+ * @author LMS - VCO
+ * @date 2025-01-02
+ *
+ * @details Cette fonction utilise les masques `LEDS_PORTA_MASK` et `LEDS_PORTB_MASK`
+ *          pour forcer les broches correspondantes à l'état haut (1), éteignant ainsi
+ *          les LEDs connectées.
+ */
+void TurnOffAllLEDs(void) {
+    // Éteindre les LEDs sur PORTA et PORTB
+    PLIB_PORTS_Write(PORTS_ID_0, PORT_CHANNEL_A, 
+                     PLIB_PORTS_Read(PORTS_ID_0, PORT_CHANNEL_A) | LEDS_PORTA_MASK);
+    PLIB_PORTS_Write(PORTS_ID_0, PORT_CHANNEL_B, 
+                     PLIB_PORTS_Read(PORTS_ID_0, PORT_CHANNEL_B) | LEDS_PORTB_MASK);
+}
 
 
 // *****************************************************************************
@@ -154,7 +230,7 @@ void APP_Tasks ( void )
             printf_lcd("Mendes Leo"); // Affiche le nom de l'auteur
             
             BSP_InitADC10(); // Initialisation des ADC (convertisseurs analogiques-numériques)
-            ledsON(); // Allume toutes les LEDs
+            TurnOnAllLEDs(); // Allume toutes les LEDs
             DRV_TMR0_Start(); // Démarre le timer 0 avec une période de 100 ms
             
             APP_UpdateState(APP_STATE_WAIT); // Passe à l'état WAIT
@@ -170,13 +246,13 @@ void APP_Tasks ( void )
         {
             if (First_iteration == true) // Si c'est la première itération
             {
-                ledsOFF(); // Éteint toutes les LEDs
+                TurnOffAllLEDs(); // Éteint toutes les LEDs
                 First_iteration = false; // Marque la fin de la première itération
             }
             else
             {
                 chaserPosition++; // Avance d'une position dans le chaser
-                if (chaserPosition == 8) // Si la position dépasse la dernière LED
+                if (chaserPosition == NBR_LEDS) // Si la position dépasse la dernière LED
                 {
                     chaserPosition = 0; // Reboucle sur la première LED
                 }
@@ -199,103 +275,20 @@ void APP_Tasks ( void )
     }
 }
 
-
- 
+/**
+ * @brief Met à jour l'état actuel de l'application.
+ * @author LMS
+ * @date 2025-01-02
+ * 
+ * @param Newstate Nouveau état à affecter à l'application (type APP_STATES).
+ * 
+ * @details Cette fonction met à jour la variable globale `appData.state` avec
+ *          la valeur de l'état fourni en paramètre.
+ */ 
 void APP_UpdateState (APP_STATES Newstate)
 {
     appData.state = Newstate; // Met à jour l'état de l'application
 }
-
-
-void App_Timer1Callback()
-{
-    static int8_t Iteration = 0;      // Compteur pour suivre les cycles (100 ms par cycle)
-    static bool InitialDelayDone = false; // Indique si le délai initial de 3 secondes est terminé
-
-    if (InitialDelayDone == false) // Si le délai initial de 3 secondes n'est pas encore terminé
-    {
-        Iteration++; // Incrémente le compteur à chaque cycle (100 ms)
-
-        if (Iteration >= 30) // Après 3 secondes (30 cycles de 100 ms)
-        {
-            InitialDelayDone = true; // Le délai initial est terminé
-            APP_UpdateState(APP_STATE_SERVICE_TASKS); // Passe à l'état APP_STATE_SERVICE_TASKS
-        }
-    }
-    else
-    {
-        APP_UpdateState(APP_STATE_SERVICE_TASKS); // Passe à SERVICE_TASKS à chaque cycle après le délai initial
-    }
-}
-
-
-void ledsON()
-{
-    BSP_LEDOn(BSP_LED_0);
-    BSP_LEDOn(BSP_LED_1);
-    BSP_LEDOn(BSP_LED_2);
-    BSP_LEDOn(BSP_LED_3);
-    BSP_LEDOn(BSP_LED_4);
-    BSP_LEDOn(BSP_LED_5);    
-    BSP_LEDOn(BSP_LED_6);
-    BSP_LEDOn(BSP_LED_7);
-}
-
-void ledsOFF()
-{
-    BSP_LEDOff(BSP_LED_0);
-    BSP_LEDOff(BSP_LED_1);
-    BSP_LEDOff(BSP_LED_2);
-    BSP_LEDOff(BSP_LED_3);
-    BSP_LEDOff(BSP_LED_4);
-    BSP_LEDOff(BSP_LED_5);    
-    BSP_LEDOff(BSP_LED_6);
-    BSP_LEDOff(BSP_LED_7);
-}
-
-void chaser(uint8_t _chaserPosition) // Gère la position du chaser
-{
-    switch(_chaserPosition)
-    {
-        case 0:
-            LED0_W = 0; 
-            LED7_W = 1;
-            break;
-        case 1:
-            LED1_W = 0; 
-            LED0_W = 1;
-            break;
-        case 2:
-            LED2_W = 0; 
-            LED1_W = 1;
-            break;
-        case 3:
-            LED3_W = 0; 
-            LED2_W = 1;
-            break;
-        case 4:
-            LED4_W = 0; 
-            LED3_W = 1;
-            break;
-        case 5:
-            LED5_W = 0; 
-            LED4_W = 1;
-            break;
-        case 6:
-            LED6_W = 0; 
-            LED5_W = 1;
-            break;
-        case 7:
-            LED7_W = 0; 
-            LED6_W = 1;
-            break;
-        default:
-            ledsOFF();// Éteint toutes les LEDs si la position est invalide
-            break;
-    }
-}
-
-
 /*******************************************************************************
  End of File
  */

@@ -73,7 +73,10 @@ extern "C" {
 // Section: Type Definitions
 // *****************************************************************************
 // *****************************************************************************
-
+#define NBR_LEDS 8
+// Masques pour les LEDs
+#define LEDS_PORTA_MASK  0b1000011111110011 // RA0-RA7 et RA15
+#define LEDS_PORTB_MASK  0b0000010000000000 // RB10    
 // *****************************************************************************
 /* Application states
 
@@ -126,8 +129,13 @@ typedef struct
 // Section: Application Callback Routines
 // *****************************************************************************
 // *****************************************************************************
-/* These routines are called by drivers when certain events occur.
-*/
+/**
+ * @brief Fonction callback pour le Timer 1.
+ *
+ * Appelée lors de chaque interruption du Timer 1. Gère un compteur pour les premières
+ * secondes et lance l'exécution de tâches après ce délai.
+ */
+void App_Timer1Callback(void);
 	
 // *****************************************************************************
 // *****************************************************************************
@@ -135,80 +143,59 @@ typedef struct
 // *****************************************************************************
 // *****************************************************************************
 
-/*******************************************************************************
-  Function:
-    void APP_Initialize ( void )
-
-  Summary:
-     MPLAB Harmony application initialization routine.
-
-  Description:
-    This function initializes the Harmony application.  It places the 
-    application in its initial state and prepares it to run so that its 
-    APP_Tasks function can be called.
-
-  Precondition:
-    All other system initialization routines should be called before calling
-    this routine (in "SYS_Initialize").
-
-  Parameters:
-    None.
-
-  Returns:
-    None.
-
-  Example:
-    <code>
-    APP_Initialize();
-    </code>
-
-  Remarks:
-    This routine must be called from the SYS_Initialize function.
-*/
-
-void APP_Initialize ( void );
-void ledsON(void);    // Allume toutes les LEDs
-void ledsOFF(void);   // Éteint toutes les LEDs
-void chaser(uint8_t chaserPosition); // Effectue une animation de type chaser en fonction de la position
-
-
-/*******************************************************************************
-  Function:
-    void APP_Tasks ( void )
-
-  Summary:
-    MPLAB Harmony Demo application tasks function
-
-  Description:
-    This routine is the Harmony Demo application's tasks function.  It
-    defines the application's state machine and core logic.
-
-  Precondition:
-    The system and application initialization ("SYS_Initialize") should be
-    called before calling this.
-
-  Parameters:
-    None.
-
-  Returns:
-    None.
-
-  Example:
-    <code>
-    APP_Tasks();
-    </code>
-
-  Remarks:
-    This routine must be called from SYS_Tasks() routine.
+/**
+ * @brief Initialise l'application.
+ *
+ * Cette fonction prépare l'application pour qu'elle puisse être exécutée.
+ * Elle doit être appelée depuis la fonction `SYS_Initialize()`.
+ *
+ * @pre Toutes les initialisations du système doivent être terminées avant d?appeler cette fonction.
  */
+void APP_Initialize(void);
 
-void APP_Tasks( void );
-void APP_UpdateState ( APP_STATES NewState );
-void App_Timer1Callback();
-void BSP_AllLEDsOff();
-void BSP_AllLEDsOn();
-void ledsON();
+/**
+ * @brief Met à jour l'état courant de l'application.
+ *
+ * @param NewState Le nouvel état à affecter (de type @c APP_STATES).
+ */
+void APP_UpdateState(APP_STATES NewState);
 
+/**
+ * @brief Gère la machine à états principale de l'application.
+ *
+ * Cette fonction définit la logique principale de l'application et est appelée
+ * de manière continue depuis `SYS_Tasks()`. En fonction de l'état courant,
+ * différentes actions sont exécutées.
+ */
+void APP_Tasks(void);
+
+// *****************************************************************************
+// *****************************************************************************
+// Section: Application specific functions
+// *****************************************************************************
+// *****************************************************************************
+/**
+ * @brief Effectue une animation de type chaser en fonction de la position.
+ *
+ * @param[in] chaserPosition Position actuelle dans la séquence d'animation du chaser (0 à LED_COUNT - 1).
+ *
+ * @return void
+ */
+void chaser(uint8_t chaserPosition);
+
+/**
+ * @brief Allume toutes les LEDs actives bas.
+ *
+ * Met à l'état bas toutes les broches associées aux LEDs.
+ */
+void TurnOnAllLEDs(void);
+
+/**
+ * @brief Éteint toutes les LEDs actives bas.
+ *
+ * Met à l'état haut toutes les broches associées aux LEDs.
+ */
+void TurnOffAllLEDs(void);
 #endif /* _APP_H */
 
 //DOM-IGNORE-BEGIN
