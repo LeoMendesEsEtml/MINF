@@ -53,9 +53,9 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 // *****************************************************************************
 
-#include "app.h"
-#include "bsp.h"
-#include "Mc32DriverLcd.h"
+#include "app.h"            // Contient les définitions, prototypes et structures de l'application.
+#include "Mc32DriverLcd.h"  // Fournit les fonctions pour gérer l'écran LCD (initialisation, affichage, etc.).
+#include "bsp.h"            // Inclut les fonctions spécifiques au matériel (ADC, LEDs, etc.).
 
 // *****************************************************************************
 // *****************************************************************************
@@ -78,6 +78,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     Application strings and buffers are be defined outside this structure.
 */
 
+// Donnmée de l'app
 APP_DATA appData;
 
 // *****************************************************************************
@@ -85,6 +86,12 @@ APP_DATA appData;
 // Section: Application Callback Functions
 // *****************************************************************************
 // *****************************************************************************
+/**
+ * @brief Fonction callback pour le Timer 1.
+ *
+ * Appelée lors de chaque interruption du Timer 1. Gère un compteur pour les premières
+ * secondes et lance l'exécution de tâches après ce délai.
+ */
 void App_Timer1Callback()
 {
     static int8_t Iteration = 0;      // Compteur pour suivre les cycles (100 ms par cycle)
@@ -94,7 +101,7 @@ void App_Timer1Callback()
     {
         Iteration++; // Incrémente le compteur à chaque cycle (100 ms)
 
-        if (Iteration >= 30) // Après 3 secondes (30 cycles de 100 ms)
+        if (Iteration >= NBR_TIC_INIT_TIME) // Après 3 secondes (30 cycles de 100 ms)
         {
             InitialDelayDone = true; // Le délai initial est terminé
             APP_UpdateState(APP_STATE_SERVICE_TASKS); // Passe à l'état APP_STATE_SERVICE_TASKS
@@ -111,35 +118,45 @@ void App_Timer1Callback()
 // Section: Application Local Functions
 // *****************************************************************************
 // *****************************************************************************
-#define LED_COUNT 7  // Nombre de LEDs gérées
-// Tableau des positions des LEDs actives (RA0, RA1, RA4, RA5, RA6, RA15, RB10)
-const uint8_t ledPins[LED_COUNT] = {0, 1, 4, 5, 6, 15, 10};
 
-
+/**
+ * @brief Gère l'activation d'une LED dans une séquence de chaser.
+ *
+ * Cette fonction éteint d'abord toutes les LEDs, puis active une LED spécifique 
+ * selon la position dans le tableau `ledPins`. La LED active est déterminée par 
+ * la valeur de `_chaserPosition`, qui doit être un index dans la plage [0, LED_COUNT-1].
+ * Le port et la pin associés à chaque LED sont définis par les constantes spécifiques 
+ * pour les pins de PORTA et PORTB.
+ *
+ * @param _chaserPosition L'index de la LED à activer dans le tableau `ledPins`.
+ *                        La valeur doit être comprise entre 0 et `LED_COUNT - 1`.
+ *
+ * @note Cette fonction ne retourne aucune valeur.
+ */
 void chaser(uint8_t _chaserPosition)
 {
+    // Accéder directement à la LED correspondante
+    static uint8_t ledPin ;
+    // Tableau des positions des LEDs actives
+    static const uint8_t ledPins[NBR_LEDS] = {RA0, RA1, RA4, RA5, RA6, RA15, RB10};
+    
     // Éteindre toutes les LEDs
     TurnOffAllLEDs();
 
-    // Accéder directement à la LED correspondante sans validation de position
-    uint8_t ledPin = ledPins[_chaserPosition];
+    ledPin= ledPins[_chaserPosition];
 
-    // Si la LED est sur le PORTA (RA0 à RA7), on l'active
-    if (ledPin <= 7) 
+    // Si la LED est sur le PORTA (RA0 à RA7 et RA15), on l'active
+    if (ledPin <= (RA6+1) || ledPin == RA15) 
     {
-        LATA &= ~(1 << ledPin); // Met le bit correspondant à 0
+        LATA &= ~(1 << ledPin);  // Met le bit correspondant à 0
     }
     // Si la LED est sur le PORTB (RB10), on l'active
-    else if (ledPin == 10) 
+    else if (ledPin == RB10) 
     {
-        LATB &= ~(1 << ledPin); // Met le bit correspondant à 0
-    }
-    // Si la LED est sur RA15, on l'active
-    else if (ledPin == 15) 
-    {
-        LATA &= ~(1 << ledPin); // Met le bit correspondant à 0
+        LATB &= ~(1 << ledPin);  // Met le bit correspondant à 0
     }
 }
+
 
 /**
  * @brief Allume toutes les LEDs (actives bas).

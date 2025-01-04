@@ -52,13 +52,11 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 // *****************************************************************************
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdlib.h>
-#include "system_config.h"
-#include "system_definitions.h"
-#include "Mc32DriverAdc.h"
+#include <stdint.h>          // Fournit des types standard tels que uint8_t, uint32_t, etc.
+#include <stdbool.h>         // Permet l'utilisation du type bool (true/false).
+#include "system_config.h"   // Définit la configuration spécifique du système Harmony.
+#include "system_definitions.h" // Contient les définitions globales et les fonctions système (timers, interruptions, etc.).
+#include "Mc32DriverAdc.h"   // Fournit les fonctions et structures pour gérer le convertisseur analogique-numérique (ADC).
 
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
@@ -74,9 +72,21 @@ extern "C" {
 // *****************************************************************************
 // *****************************************************************************
 #define NBR_LEDS 8
-// Masques pour les LEDs
+// Définition des positions des LEDs
+#define RA0 0
+#define RA1 1
+#define RA4 4
+#define RA5 5
+#define RA6 6
+#define RA15 15
+#define RB10 10
+
+    // Masques pour les LEDs
 #define LEDS_PORTA_MASK  0b1000011111110011 // RA0-RA7 et RA15
-#define LEDS_PORTB_MASK  0b0000010000000000 // RB10    
+#define LEDS_PORTB_MASK  0b0000010000000000 // RB10 
+ 
+// Nbr d'iterations de 100ms lors de l'attente post-init 
+#define NBR_TIC_INIT_TIME 29
 // *****************************************************************************
 /* Application states
 
@@ -175,13 +185,20 @@ void APP_Tasks(void);
 // *****************************************************************************
 // *****************************************************************************
 /**
- * @brief Effectue une animation de type chaser en fonction de la position.
+ * @brief Gère l'activation d'une LED dans une séquence de chaser.
  *
- * @param[in] chaserPosition Position actuelle dans la séquence d'animation du chaser (0 à LED_COUNT - 1).
+ * Cette fonction éteint d'abord toutes les LEDs, puis active une LED spécifique 
+ * selon la position dans le tableau `ledPins`. La LED active est déterminée par 
+ * la valeur de `_chaserPosition`, qui doit être un index dans la plage [0, LED_COUNT-1].
+ * Le port et la pin associés à chaque LED sont définis par les constantes spécifiques 
+ * pour les pins de PORTA et PORTB.
  *
- * @return void
+ * @param _chaserPosition L'index de la LED à activer dans le tableau `ledPins`.
+ *                        La valeur doit être comprise entre 0 et `LED_COUNT - 1`.
+ *
+ * @note Cette fonction ne retourne aucune valeur.
  */
-void chaser(uint8_t chaserPosition);
+void chaser(uint8_t _chaserPosition);
 
 /**
  * @brief Allume toutes les LEDs actives bas.
