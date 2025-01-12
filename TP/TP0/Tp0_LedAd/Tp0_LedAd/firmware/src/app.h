@@ -52,8 +52,6 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 // *****************************************************************************
 
-#include <stdint.h>          // Fournit des types standard tels que uint8_t, uint32_t, etc.
-#include <stdbool.h>         // Permet l'utilisation du type bool (true/false).
 #include "system_config.h"   // Définit la configuration spécifique du système Harmony.
 #include "system_definitions.h" // Contient les définitions globales et les fonctions système (timers, interruptions, etc.).
 #include "Mc32DriverAdc.h"   // Fournit les fonctions et structures pour gérer le convertisseur analogique-numérique (ADC).
