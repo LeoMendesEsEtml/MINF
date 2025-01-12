@@ -55,7 +55,11 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 #include "app.h"            // Contient les définitions, prototypes et structures de l'application.
 #include "Mc32DriverLcd.h"  // Fournit les fonctions pour gérer l'écran LCD (initialisation, affichage, etc.).
+#include "Mc32DriverAdc.h"   // Fournit les fonctions et structures pour gérer le convertisseur analogique-numérique (ADC).
 #include "bsp.h"            // Inclut les fonctions spécifiques au matériel (ADC, LEDs, etc.).
+#include <stdbool.h>         // Permet l'utilisation du type bool (true/false).
+#include <stdint.h>          // Fournit des types standard tels que uint8_t, uint32_t, etc.
+
 
 // *****************************************************************************
 // *****************************************************************************
